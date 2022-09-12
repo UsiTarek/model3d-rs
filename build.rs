@@ -13,12 +13,12 @@ fn main() {
         .compile("m3d");
 
     let bindings = bindgen::Builder::default()
-        .header("m3d_wrapper.h")
+        .header("m3d.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from("src/m3d/");
+    let out_path = PathBuf::from("src/");
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
