@@ -3,6 +3,7 @@ use super::*;
 pub type Weight = m3dc::m3dw_t;
 
 #[repr(transparent)]
+#[derive(Debug, Clone)]
 pub struct Bone(m3dc::m3db_t);
 
 impl Bone {

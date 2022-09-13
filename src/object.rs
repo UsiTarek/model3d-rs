@@ -1,6 +1,7 @@
 use super::*;
 
 #[repr(transparent)]
+#[derive(Debug, Clone)]
 pub struct Obj(m3dc::m3d_t);
 
 impl Drop for Obj {
@@ -79,6 +80,50 @@ impl Obj {
             None
         } else {
             unsafe { Some(cptr_to_slice(m3d_encoded, m3d_encoded_len as _)) }
+        }
+    }
+
+    pub fn frame(
+        &self,
+        action_id: u32,
+        frame_id: u32,
+        skeleton: Option<&[Transform]>,
+    ) -> Option<&[Transform]> {
+        let transforms = unsafe {
+            m3dc::m3d_frame(
+                self as *const Obj as *mut m3dc::m3d_t,
+                action_id,
+                frame_id,
+                if let Some(skeleton) = skeleton {
+                    &skeleton[0] as *const Transform as *mut m3dc::m3dtr_t
+                } else {
+                    std::ptr::null_mut()
+                },
+            )
+        };
+
+        if transforms.is_null() {
+            None
+        } else {
+            assert!(self.0.numbone > 0);
+            unsafe {
+                Some(cptr_to_slice(
+                    transforms as *const Transform,
+                    self.0.numbone as _,
+                ))
+            }
+        }
+    }
+
+    pub fn pose(&self, action_id: u32, msec: u32) -> Option<&[Bone]> {
+        let bones =
+            unsafe { m3dc::m3d_pose(self as *const Obj as *mut m3dc::m3d_t, action_id, msec) };
+
+        if bones.is_null() {
+            None
+        } else {
+            assert!(self.0.numbone > 0);
+            unsafe { Some(cptr_to_slice(bones as *const Bone, self.0.numbone as _)) }
         }
     }
 

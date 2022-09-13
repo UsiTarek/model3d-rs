@@ -110,10 +110,10 @@ unsafe fn cptr_to_str<'a>(cstr_ptr: *const i8) -> &'a str {
     }
 }
 
-unsafe fn cptr_to_slice<'a, T>(cptr: *mut T, len: usize) -> &'a [T] {
+unsafe fn cptr_to_slice<'a, T>(cptr: *const T, len: usize) -> &'a [T] {
     assert!(len < std::isize::MAX as _);
     if cptr != ptr::null_mut() || len == 0 {
-        std::slice::from_raw_parts_mut(cptr, len as _)
+        std::slice::from_raw_parts(cptr, len as _)
     } else {
         &[]
     }

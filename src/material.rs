@@ -3,6 +3,7 @@ use super::*;
 pub type MaterialProp = m3dc::m3dp_t;
 
 #[repr(transparent)]
+#[derive(Debug, Clone)]
 pub struct Material(m3dc::m3dm_t);
 
 impl Material {

@@ -1,6 +1,7 @@
 use super::*;
 
 #[repr(transparent)]
+#[derive(Debug, Clone)]
 pub struct InlinedTexture(m3dc::m3di_t);
 
 impl InlinedTexture {
