@@ -1,7 +1,15 @@
 [package]
 name = "model3d"
+description = "Rust port of the Model3D C SDK."
 version = "0.1.0"
 edition = "2021"
+authors = ["Tarik Benouissaaden <TarikBenouissaaden@protonmail.com>"]
+license = "MIT"
+license-file = "LICENSE"
+readme = "README.md"
+homepage = "https://gitlab.com/bztsrc/model3d/-/tree/master"
+repository = "https://github.com/UsiTarek/model3d-rs"
+publish = true
 
 [dependencies]
 num_enum = "0.5"
