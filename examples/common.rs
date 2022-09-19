@@ -27,12 +27,17 @@ pub trait Example {
         surface: &wgpu::Surface,
         queue: &wgpu::Queue,
     );
-    fn on_resize(&mut self, surface: &wgpu::Surface, size: PhysicalSize<u32>);
+    fn on_resize(
+        &mut self,
+        device: &wgpu::Device,
+        surface: &wgpu::Surface,
+        size: PhysicalSize<u32>,
+    );
     fn on_update(&mut self, dt: f32);
     fn on_render(
         &mut self,
         device: &wgpu::Device,
-        drawable_frame: wgpu::SurfaceTexture,
+        drawable_view: &wgpu::TextureView,
         queue: &wgpu::Queue,
     );
 }
@@ -45,11 +50,11 @@ pub fn run(mut ex: Box<dyn Example>) {
         .build(&event_loop)
         .unwrap();
 
-    let instance = wgpu::Instance::new(wgpu::Backends::DX12);
+    let instance = wgpu::Instance::new(wgpu::Backends::PRIMARY);
     let surface = unsafe { instance.create_surface(&window) };
 
     let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::default(),
+        power_preference: wgpu::PowerPreference::HighPerformance,
         force_fallback_adapter: false,
         compatible_surface: Some(&surface),
     });
@@ -78,7 +83,7 @@ pub fn run(mut ex: Box<dyn Example>) {
                     format,
                     width: size.width,
                     height: size.height,
-                    present_mode: wgpu::PresentMode::AutoVsync,
+                    present_mode: wgpu::PresentMode::Fifo,
                 },
             );
         }
@@ -86,6 +91,7 @@ pub fn run(mut ex: Box<dyn Example>) {
     configure_surface(&surface, &device, swapchain_format, window.inner_size());
 
     ex.on_init(&window, &device, &adapter, &surface, &queue);
+    device.poll(wgpu::Maintain::Wait);
 
     let mut dt = 0.0f32;
     event_loop.run(move |event, _, control_flow| {
@@ -102,7 +108,7 @@ pub fn run(mut ex: Box<dyn Example>) {
                 ..
             } => {
                 configure_surface(&surface, &device, swapchain_format, size);
-                ex.on_resize(&surface, size)
+                ex.on_resize(&device, &surface, size)
             }
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
@@ -111,13 +117,20 @@ pub fn run(mut ex: Box<dyn Example>) {
             Event::RedrawRequested(_) => {
                 let cur_frame = surface.get_current_texture().unwrap();
 
-                ex.on_render(&device, cur_frame, &queue);
+                let view = cur_frame
+                    .texture
+                    .create_view(&wgpu::TextureViewDescriptor::default());
+
+                ex.on_render(&device, &view, &queue);
+
+                cur_frame.present();
             }
             _ => (),
         }
 
         let frame_time_end = std::time::Instant::now();
         dt = (frame_time_end - frame_time_start).as_secs_f32();
+        window.request_redraw();
     });
 }
 
