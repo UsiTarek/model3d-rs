@@ -26,4 +26,4 @@ nalgebra-glm = "0.17"
 bytemuck = { version = "1.12", features = ["derive"] }
 
 [[example]]
-name = "cube"
+name = "model"

@@ -27,10 +27,8 @@ pub use texture::*;
 
 pub mod object;
 
-use std::ffi::CStr;
-use std::ptr;
-
 use self::bindings::m3d_save;
+use std::ffi::CStr;
 
 bitflags! {
     pub struct SaveFlags : i32 {
@@ -62,7 +60,7 @@ bitflags! {
 }
 
 #[repr(i32)]
-#[derive(Debug, Copy, Clone, PartialEq, num_enum::FromPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, num_enum::FromPrimitive)]
 pub enum QuantizeQuality {
     #[num_enum(default)]
     Int8 = m3dc::M3D_EXP_INT8 as _,
@@ -72,7 +70,7 @@ pub enum QuantizeQuality {
 }
 
 #[repr(i8)]
-#[derive(Debug, Copy, Clone, PartialEq, num_enum::FromPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, num_enum::FromPrimitive)]
 pub enum Error {
     Alloc = m3dc::M3D_ERR_ALLOC as _,
     BadFile = m3dc::M3D_ERR_BADFILE as _,
@@ -102,8 +100,8 @@ pub enum Error {
 
 unsafe fn cptr_to_str<'a>(cstr_ptr: *const i8) -> &'a str {
     assert!(!cstr_ptr.is_null());
-    let result = CStr::from_ptr(cstr_ptr).to_str();
-    if let Some(str) = result.ok() {
+    let result = CStr::from_ptr(cstr_ptr).to_str().ok();
+    if let Some(str) = result {
         str
     } else {
         ""
@@ -112,7 +110,7 @@ unsafe fn cptr_to_str<'a>(cstr_ptr: *const i8) -> &'a str {
 
 unsafe fn cptr_to_slice<'a, T>(cptr: *const T, len: usize) -> &'a [T] {
     assert!(len < std::isize::MAX as _);
-    if cptr != ptr::null_mut() || len == 0 {
+    if !cptr.is_null() || len == 0 {
         std::slice::from_raw_parts(cptr, len as _)
     } else {
         &[]
@@ -133,7 +131,7 @@ unsafe extern "C" fn m3dread_default(
         *size = libc::ftell(file) as _;
         libc::fseek(file, 0, libc::SEEK_SET);
         ret = libc::malloc((*size + 1) as _) as _;
-        if ret != std::ptr::null_mut() {
+        if !ret.is_null() {
             libc::fread(ret as _, *size as _, 1, file);
             *(ret.offset(*size as _)) = 0;
         } else {

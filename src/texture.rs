@@ -1,7 +1,7 @@
 use super::*;
 use num_enum::FromPrimitive;
 
-#[derive(Debug, Copy, Clone, PartialEq, FromPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive)]
 #[repr(u8)]
 pub enum TextureFormat {
     #[num_enum(default)]
