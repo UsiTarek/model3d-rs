@@ -2,7 +2,7 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    println!("cargo:rerun-if-changed=m3d.h");
+    println!("cargo:rerun-if-changed=model3d/m3d.h");
     println!("cargo:rustc-link-search={}", env::var("OUT_DIR").unwrap());
     println!("cargo:rustc-link-lib=static=m3d");
 
@@ -14,7 +14,7 @@ fn main() {
         .compile("m3d");
 
     let bindings = bindgen::Builder::default()
-        .header("m3d.h")
+        .header("model3d/m3d.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .expect("Unable to generate bindings");

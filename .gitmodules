@@ -1,0 +1,3 @@
+[submodule "model3d"]
+	path = model3d
+	url = https://gitlab.com/bztsrc/model3d.git
