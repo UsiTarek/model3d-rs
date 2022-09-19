@@ -13,7 +13,7 @@ pub enum TextureFormat {
 }
 
 #[repr(transparent)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Texture(m3dc::m3dtx_t);
 
 impl Texture {

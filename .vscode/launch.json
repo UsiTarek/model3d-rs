@@ -1,0 +1,101 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'model3d'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=model3d"
+                ],
+                "filter": {
+                    "name": "model3d",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'cube'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=cube",
+                    "--package=model3d"
+                ],
+                "filter": {
+                    "name": "cube",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'cube'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=cube",
+                    "--package=model3d"
+                ],
+                "filter": {
+                    "name": "cube",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'wgpu-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=wgpu-example",
+                    "--package=wgpu-example"
+                ],
+                "filter": {
+                    "name": "wgpu-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'wgpu-example'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=wgpu-example",
+                    "--package=wgpu-example"
+                ],
+                "filter": {
+                    "name": "wgpu-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

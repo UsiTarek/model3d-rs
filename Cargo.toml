@@ -1,7 +1,7 @@
 [package]
 name = "model3d"
-description = "Rust port of the Model3D C SDK."
-version = "0.1.0"
+description = "Rust wrapper of the Model3D C SDK."
+version = "0.0.1"
 edition = "2021"
 authors = ["Tarik Benouissaaden <TarikBenouissaaden@protonmail.com>"]
 license = "MIT"
@@ -17,3 +17,13 @@ libc = "0.2"
 [build-dependencies]
 bindgen = "0.60"
 cc = "1.0"
+
+[dev-dependencies]
+winit = "0.27"
+wgpu = "0.13"
+pollster = "0.2"
+nalgebra-glm = "0.17"
+bytemuck = { version = "1.12", features = ["derive"] }
+
+[[example]]
+name = "cube"

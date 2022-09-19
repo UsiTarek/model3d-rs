@@ -144,3 +144,7 @@ unsafe extern "C" fn m3dread_default(
 
     ret
 }
+
+unsafe extern "C" fn m3dfree_default(to_free: *mut m3dc::m3d_t) {
+    libc::free(to_free as _)
+}

@@ -8,7 +8,8 @@ impl Drop for Obj {
     fn drop(&mut self) {
         unsafe {
             let m3d_ptr = std::mem::transmute::<_, *mut m3dc::m3d_t>(self);
-            m3dc::m3d_free(m3d_ptr);
+            //#TODO: Using libc to read file to buffer and free it, expose proper rust closures.
+            m3dfree_default(m3d_ptr);
         }
     }
 }

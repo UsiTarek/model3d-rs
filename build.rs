@@ -2,13 +2,14 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    println!("cargo:rerun-if-changed=m3d_wrapper.h");
+    println!("cargo:rerun-if-changed=m3d.h");
     println!("cargo:rustc-link-search={}", env::var("OUT_DIR").unwrap());
     println!("cargo:rustc-link-lib=static=m3d");
 
     cc::Build::new()
+        .warnings(false)
+        .opt_level(2)
         .define("M3D_EXPORTER", None)
-        .compiler("clang")
         .file("m3d.c")
         .compile("m3d");
 

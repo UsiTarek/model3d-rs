@@ -1,0 +1,9 @@
+{
+    "rust-analyzer.checkOnSave.extraArgs": [
+        "--target-dir",
+        "/tmp/rust-analyzer-check"
+    ],
+    "files.associations": {
+        "m3d.h": "c"
+    }
+}
