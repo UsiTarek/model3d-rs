@@ -21,6 +21,7 @@ pub use action::*;
 pub use bitflags::bitflags;
 pub use bone::*;
 pub use inlined_texture::*;
+use libc::c_void;
 pub use material::*;
 pub use object::*;
 pub use texture::*;
@@ -143,6 +144,6 @@ unsafe extern "C" fn m3dread_default(
     ret
 }
 
-unsafe extern "C" fn m3dfree_default(to_free: *mut m3dc::m3d_t) {
+unsafe extern "C" fn m3dfree_default(to_free: *mut c_void) {
     libc::free(to_free as _)
 }

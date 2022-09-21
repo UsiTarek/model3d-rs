@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 fn main() {
     println!("cargo:rerun-if-changed=model3d/m3d.h");
+    println!("cargo:rerun-if-changed=m3d.c");
     println!("cargo:rustc-link-search={}", env::var("OUT_DIR").unwrap());
     println!("cargo:rustc-link-lib=static=m3d");
 

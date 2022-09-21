@@ -8,8 +8,8 @@ impl Drop for Obj {
     fn drop(&mut self) {
         unsafe {
             let m3d_ptr = self as *mut object::Obj as *mut bindings::m3d_t;
-            //#TODO: Using libc to read file to buffer and free it, expose proper rust closures.
-            m3dfree_default(m3d_ptr);
+            //@TODO: Using libc to read file to buffer and free it, expose proper rust closures.
+            m3dfree_default(m3d_ptr as _);
         }
     }
 }
@@ -24,12 +24,12 @@ impl Obj {
             None => std::ptr::null_mut(),
         };
 
-        //#TODO: Using libc to read file to buffer and free it, expose proper rust closures.
+        //@TODO: Using libc to read file to buffer and free it, expose proper rust closures.
         let m3d_c = unsafe {
             m3dc::m3d_load(
                 data.as_mut_ptr(),
                 Some(m3dread_default),
-                Some(libc::free),
+                Some(m3dfree_default),
                 mttlib_c,
             )
         };

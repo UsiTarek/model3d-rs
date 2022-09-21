@@ -27,13 +27,11 @@ pub trait Example {
         surface: &wgpu::Surface,
         queue: &wgpu::Queue,
     );
-    fn on_resize(
-        &mut self,
-        device: &wgpu::Device,
-        surface: &wgpu::Surface,
-        size: PhysicalSize<u32>,
-    );
-    fn on_update(&mut self, dt: f32);
+
+    fn on_resize(&mut self, device: &wgpu::Device, size: PhysicalSize<u32>);
+
+    fn on_update(&mut self, _dt: f32) {}
+
     fn on_render(
         &mut self,
         device: &wgpu::Device,
@@ -94,6 +92,7 @@ pub fn run(mut ex: Box<dyn Example>) {
     device.poll(wgpu::Maintain::Wait);
 
     let mut dt = 0.0f32;
+
     event_loop.run(move |event, _, control_flow| {
         let frame_time_start = std::time::Instant::now();
         *control_flow = ControlFlow::Poll;
@@ -108,7 +107,7 @@ pub fn run(mut ex: Box<dyn Example>) {
                 ..
             } => {
                 configure_surface(&surface, &device, swapchain_format, size);
-                ex.on_resize(&device, &surface, size)
+                ex.on_resize(&device, size)
             }
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,

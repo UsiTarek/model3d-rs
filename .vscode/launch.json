@@ -26,15 +26,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug example 'cube'",
+            "name": "Debug example 'model'",
             "cargo": {
                 "args": [
                     "build",
-                    "--example=cube",
+                    "--example=model",
                     "--package=model3d"
                 ],
                 "filter": {
-                    "name": "cube",
+                    "name": "model",
                     "kind": "example"
                 }
             },
@@ -44,16 +44,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in example 'cube'",
+            "name": "Debug unit tests in example 'model'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--example=cube",
+                    "--example=model",
                     "--package=model3d"
                 ],
                 "filter": {
-                    "name": "cube",
+                    "name": "model",
                     "kind": "example"
                 }
             },

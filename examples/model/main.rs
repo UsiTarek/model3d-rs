@@ -11,8 +11,8 @@ use winit::{window::Window, *};
 #[derive(Debug, Default, Clone, Copy, Pod, Zeroable)]
 struct Vertex {
     position: [f32; 3],
-    color: [f32; 4],
     normal: [f32; 3],
+    color: [f32; 4],
 }
 
 #[derive(Default)]
@@ -34,12 +34,8 @@ impl common::Example for CubeExample {
         surface: &wgpu::Surface,
         queue: &wgpu::Queue,
     ) {
-        let model_dir = std::path::PathBuf::from(file!())
-            .parent()
-            .unwrap()
-            .to_owned();
+        let m3d_obj = m3d::Obj::load_from_file("model3d/models/cube_usemtl.m3d", None).unwrap();
 
-        let m3d_obj = m3d::Obj::load_from_file(model_dir.join("lantea.m3d"), None).unwrap();
         let vertices = m3d_obj
             .faces()
             .iter()
@@ -49,7 +45,7 @@ impl common::Example for CubeExample {
                     let v = m3d_obj.vertices()[f.vertex[idx as usize] as usize];
                     let vn = m3d_obj.vertices()[f.normal[idx as usize] as usize];
 
-                    let color: [f32; 4] = [
+                    let [r, g, b, a]: [f32; 4] = [
                         ((v.color >> 00) & 0xff) as f32 / (u8::MAX as f32),
                         ((v.color >> 08) & 0xff) as f32 / (u8::MAX as f32),
                         ((v.color >> 16) & 0xff) as f32 / (u8::MAX as f32),
@@ -57,13 +53,12 @@ impl common::Example for CubeExample {
                     ];
 
                     vertices[idx].position = [v.x, v.y, v.z];
-                    vertices[idx].color = color;
+                    vertices[idx].color = [r, g, b, a];
                     vertices[idx].normal = [vn.x, vn.y, vn.z];
                 }
                 vertices
             })
             .collect::<Vec<_>>();
-        self.vertices_len = vertices.len();
 
         let window_size = window.inner_size();
 
@@ -71,24 +66,23 @@ impl common::Example for CubeExample {
             FRAC_PI_4,
             window_size.width as f32,
             window_size.height as f32,
-            0.001,
-            100000.0,
+            0.1,
+            1000000.0,
         );
-        let view = glm::Mat4::identity().append_translation(&glm::vec3(-1.0f32, -0.25f32, -3.0f32));
+        let view = glm::Mat4::identity().append_translation(&glm::vec3(-0.5f32, -0.25f32, -3.0f32));
         let model = glm::rotate(
             &glm::Mat4::identity(),
-            145.0f32,
+            45.0f32,
             &glm::vec3(0.0f32, 1.0f32, 0.0f32),
         );
         let pvm = perspective * view * model;
 
         let model_buf = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Model Buffer"),
-            size: (self.vertices_len * std::mem::size_of::<Vertex>()) as u64,
+            size: (vertices.len() * std::mem::size_of::<Vertex>()) as u64,
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        self.model_buf = Some(model_buf);
 
         let uni_buf = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Uniform buffer"),
@@ -96,18 +90,9 @@ impl common::Example for CubeExample {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        self.uni_buf = Some(uni_buf);
 
-        queue.write_buffer(
-            self.model_buf.as_ref().unwrap(),
-            0,
-            bytemuck::cast_slice(&vertices),
-        );
-        queue.write_buffer(
-            &self.uni_buf.as_ref().unwrap(),
-            0,
-            bytemuck::cast_slice(pvm.as_ref()),
-        );
+        queue.write_buffer(&model_buf, 0, bytemuck::cast_slice(&vertices));
+        queue.write_buffer(&uni_buf, 0, bytemuck::cast_slice(pvm.as_ref()));
 
         let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
             label: None,
@@ -122,8 +107,6 @@ impl common::Example for CubeExample {
             format: wgpu::TextureFormat::Depth24Plus,
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
         });
-        self.depth_stencil_view =
-            Some(depth_texture.create_view(&wgpu::TextureViewDescriptor::default()));
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Vertex Shader"),
@@ -161,7 +144,7 @@ impl common::Example for CubeExample {
                 buffers: &[wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x4, 2 => Float32x3],
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x4],
                 }],
             },
             fragment: Some(wgpu::FragmentState {
@@ -183,25 +166,26 @@ impl common::Example for CubeExample {
             multisample: wgpu::MultisampleState::default(),
             multiview: None,
         });
-        self.pipeline = Some(pipeline);
 
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
             layout: &bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
-                resource: self.uni_buf.as_ref().unwrap().as_entire_binding(),
+                resource: uni_buf.as_entire_binding(),
             }],
         });
+
+        self.vertices_len = vertices.len();
+        self.model_buf = Some(model_buf);
+        self.uni_buf = Some(uni_buf);
+        self.depth_stencil_view =
+            Some(depth_texture.create_view(&wgpu::TextureViewDescriptor::default()));
+        self.pipeline = Some(pipeline);
         self.bind_group = Some(bind_group);
     }
 
-    fn on_resize(
-        &mut self,
-        device: &wgpu::Device,
-        _surface: &wgpu::Surface,
-        size: dpi::PhysicalSize<u32>,
-    ) {
+    fn on_resize(&mut self, device: &wgpu::Device, size: dpi::PhysicalSize<u32>) {
         let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
             label: None,
             size: wgpu::Extent3d {
@@ -227,14 +211,14 @@ impl common::Example for CubeExample {
     ) {
         let depth_stencil_view = self.depth_stencil_view.as_ref().unwrap();
         let pipeline = self.pipeline.as_ref().unwrap();
-        let v_buffer = self.model_buf.as_ref().unwrap();
+        let vtx_buffer = self.model_buf.as_ref().unwrap();
         let bind_group = self.bind_group.as_ref().unwrap();
 
         let mut encoder =
             device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         {
             let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: None,
+                label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: drawable_view,
                     resolve_target: None,
@@ -259,15 +243,13 @@ impl common::Example for CubeExample {
             });
 
             rpass.set_pipeline(pipeline);
-            rpass.set_vertex_buffer(0, v_buffer.slice(..));
+            rpass.set_vertex_buffer(0, vtx_buffer.slice(..));
             rpass.set_bind_group(0, bind_group, &[]);
             rpass.draw(0..(self.vertices_len as _), 0..1);
         }
 
-        queue.submit(std::iter::once(encoder.finish()));
+        queue.submit([encoder.finish()]);
     }
-
-    fn on_update(&mut self, _dt: f32) {}
 }
 
 fn main() {
